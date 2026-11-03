@@ -24,7 +24,7 @@ async function createBot() {
       await ctx.sendChatAction('typing');
 
       const respostaGemini = await ai.models.generateContent({
-        model: 'gemini-3.8-flash',
+        model: 'gemini-3.6-flash',
         contents: texto,
       });
 
