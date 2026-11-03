@@ -11,6 +11,11 @@ async function createBot() {
   const { GoogleGenAI } = await import('@google/genai');
   const ai = new GoogleGenAI({ apiKey: geminiApiKey });
   const bot = new Telegraf(botToken);
+const idPermitido = String(process.env.ALLOWED_TELEGRAM_USER_ID || "").trim();
+bot.use(async (ctx, next) => {
+if (!idPermitido || String(ctx.from?.id) !== idPermitido) return;
+return next();
+});
 
   bot.start((ctx) =>
     ctx.reply('Olá! Sou o Meu Agente A30. Envie uma pergunta para conversar comigo.')
@@ -23,9 +28,11 @@ async function createBot() {
     try {
       await ctx.sendChatAction('typing');
 
+const agora = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", dateStyle: "full", timeStyle: "short" });
       const respostaGemini = await ai.models.generateContent({
         model: 'gemini-3.6-flash',
         contents: texto,
+config: { systemInstruction: "Hoje é " + agora + " (horário de Brasília). Responda em português do Brasil, sem usar asteriscos nem markdown." },
       });
 
       const resposta = (respostaGemini.text || '').trim();
